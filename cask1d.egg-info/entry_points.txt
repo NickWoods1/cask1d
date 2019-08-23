@@ -1,0 +1,3 @@
+[console_scripts]
+cask1d = cask1d.src.main:main
+
