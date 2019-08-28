@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 from density2potential.utils.physics import element_charges, calculate_density_ks
 from density2potential.utils.math import discrete_Laplace, normalise_function
 import scipy.linalg as linalg
-from cask1d.src.hamiltonian import construct_hamiltonian, v_h, v_ext, v_xc
+from cask1d.src.hamiltonian import construct_hamiltonian_independent, update_hamiltonian
+from cask1d.src.hamiltonian import evaluate_energy_functional
 from cask1d.src.scf import pulay_mixing
 
 """
@@ -25,6 +26,9 @@ def minimise_energy_dft(params):
     # Generate initial guess density (sum weighted Gaussians)
     density_in = initial_guess_density(params)
 
+    # Construct the independent part of the hamiltonian, i.e. KE + v_external
+    hamiltonian_independent = construct_hamiltonian_independent(params)
+
     # SCF loop
     i, error = 0, 1
     while error > 1e-10:
@@ -33,8 +37,7 @@ def minimise_energy_dft(params):
         i_mod = i % params.history_length
         i_mod_prev = (i-1) % params.history_length
 
-        # Construct Hamiltonian
-        hamiltonian = construct_hamiltonian(params, density_in)
+        hamiltonian = update_hamiltonian(params, hamiltonian_independent, density_in)
 
         # Solve H psi = E psi
         eigenvalues, eigenvectors = linalg.eigh(hamiltonian)
@@ -47,9 +50,7 @@ def minimise_energy_dft(params):
         density_out = calculate_density_ks(params, wavefunctions_ks)
 
         # Calculate total energy
-        total_energy = calculate_total_energy(params, eigenvalues[0:params.num_particles], density_in)
-        print(evaluate_ks_functional(params, wavefunctions_ks, density_out))
-
+        total_energy = evaluate_energy_functional(params, wavefunctions_ks, density_out)
 
         # L1 error between input and output densities
         error = np.sum(abs(density_in - density_out)*params.dx)
@@ -61,12 +62,10 @@ def minimise_energy_dft(params):
         history_of_residuals[i_mod,:] = density_out - density_in
 
         if i == 0:
-
             # Damped linear step for the first iteration
             density_in = density_in - params.step_length * (density_in - density_out)
 
         elif i > 0:
-
             # Store more iterative history data...
             density_differences[i_mod_prev] = history_of_densities_in[i_mod] - history_of_densities_in[i_mod_prev]
             residual_differences[i_mod_prev] = history_of_residuals[i_mod] - history_of_residuals[i_mod_prev]
@@ -75,8 +74,12 @@ def minimise_energy_dft(params):
             density_in = pulay_mixing(params, density_differences, residual_differences,
                                       history_of_residuals[i_mod], history_of_densities_in[i_mod], i)
 
+
         i += 1
 
+    x = np.load('hf_density.npy')
+
+    plt.plot(x)
     plt.plot(density_out)
     plt.show()
 
@@ -100,41 +103,6 @@ def initial_guess_density(params):
     density *= params.num_atoms*(np.sum(density)*params.dx)**-1
 
     return density
-
-
-def evaluate_ks_functional(params, wavefunctions_ks, density):
-    r"""
-    Evaluates the KS energy functional E[n] for a given density + orbitals
-    """
-
-    # Kinetic energy
-    kinetic_energy = 0
-    laplace = discrete_Laplace(params)
-    for i in range(0,params.num_particles):
-        del_sq_phi = np.dot(laplace,wavefunctions_ks[:,i])
-        kinetic_energy += np.sum(np.conj(wavefunctions_ks[:,i])*del_sq_phi)
-
-    kinetic_energy *= -0.5*params.dx
-
-    # Hartree energy
-    hartree_pot = v_h(params, density)
-    hartree_energy = 0.5*np.sum(density*hartree_pot)*params.dx
-
-    # External
-    external_pot = v_ext(params)
-    external_energy = np.sum(density*external_pot)*params.dx
-
-    # XC energy
-    xc_pot = v_xc(density)
-    xc_energy = np.sum(density*xc_pot)*params.dx
-
-    total_energy = kinetic_energy + hartree_energy + external_energy + xc_energy
-
-    return total_energy
-
-#def evaluate_hf_functional():
-
-#def evaluate_h_functional():
 
 
 def calculate_total_energy(params, eigenenergies, density):

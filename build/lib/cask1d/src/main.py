@@ -4,6 +4,7 @@ import pickle
 import matplotlib.pyplot as plt
 from cask1d.src.input import parameters
 from cask1d.src.dft import minimise_energy_dft
+from cask1d.src.hf import minimise_energy_hf
 
 """
 Entry point for the requested action
@@ -40,6 +41,7 @@ def main():
         # Construct parameters class
         params = parameters()
 
+        #minimise_energy_hf(params)
         minimise_energy_dft(params)
 
 

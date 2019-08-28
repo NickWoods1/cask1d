@@ -11,8 +11,8 @@ class parameters(object):
         self.method = 'dft'
 
         # Size of real space cell
-        self.cell = 20
-        self.Nspace = 301
+        self.cell = 50
+        self.Nspace = 151
         self.dx = self.cell / (self.Nspace - 1)
 
         # Grid
@@ -25,15 +25,15 @@ class parameters(object):
         self.supercell = 5
 
         # List of species + position
-        self.species = ['H', 'C']
-        self.position = [-2, 2]
+        self.species = ['C']
+        self.position = [-2]
 
         # SCF
         self.history_length = 10
         self.step_length = 0.01
 
         # Coulomb softening parameter
-        self.soft = 0.1
+        self.soft = 1
 
         # Have v_ext specified by atoms or given explicitly
         self.manual_v_ext = False

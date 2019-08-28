@@ -8,6 +8,9 @@ Constructs the Hamiltonian, including all potentials
 
 
 def construct_hamiltonian(params, density, density_matrix='optional'):
+    r"""
+    Creates the full Hamiltonian for a given level of approximation
+    """
 
     # Kinetic energy stencil
     hamiltonian = kinetic(params)
@@ -18,6 +21,36 @@ def construct_hamiltonian(params, density, density_matrix='optional'):
     # Hartree potential for a given density
     hamiltonian += np.diag(v_h(params, density))
 
+    if params.method == 'dft':
+        hamiltonian += np.diag(v_xc(density))
+    elif params.method == 'hf':
+        hamiltonian += fock_exchange(params, density_matrix)
+
+    return hamiltonian
+
+
+def construct_hamiltonian_independent(params):
+
+    # Kinetic energy stencil
+    hamiltonian = kinetic(params)
+
+    # External potential generated from atomic input
+    hamiltonian += np.diag(v_ext(params))
+
+    return hamiltonian
+
+
+def update_hamiltonian(params, hamiltonian_indep, density, density_matrix='optional'):
+    r"""
+    Updates a given independent (KE + vext) Hamiltonian with the interacting terms
+    """
+
+    hamiltonian = np.copy(hamiltonian_indep)
+
+    # Hartree potential
+    hamiltonian += np.diag(v_h(params, density))
+
+    # XC or Fock potential
     if params.method == 'dft':
         hamiltonian += np.diag(v_xc(density))
     elif params.method == 'hf':
@@ -38,7 +71,9 @@ def v_xc(density):
         raise Exception('Negative density region exists, imaginary v_xc, exiting...')
 
     # Add XC potential (Entwistle 2017)
-    v_xc = (-1.24 + 2.1*density - 1.7*density**2)*density**0.61
+    #v_xc = (-1.24 + 2.1*density - 1.7*density**2)*density**0.61
+    v_xc = np.copy(density)
+    v_xc *= 0
 
     return v_xc
 
@@ -83,9 +118,9 @@ def fock_exchange(params, density_matrix):
 
     # Add Fock term
     fock = np.zeros((params.Nspace,params.Nspace))
-    for i in range(0,params.Nspace_dft):
-        for j in range(0,params.Nspace_dft):
-            fock[i,j] += density_matrix[i,j] / (abs(params.grid_dft[i] - params.grid_dft[j]) + params.soft)
+    for i in range(0,params.Nspace):
+        for j in range(0,params.Nspace):
+            fock[i,j] += density_matrix[i,j] / (abs(params.grid[i] - params.grid[j]) + params.soft)
 
     return fock
 
@@ -103,3 +138,43 @@ def coulomb(Nspace, grid, charge, position, soft):
 
     return potential
 
+
+def evaluate_energy_functional(params, wavefunctions_ks, density, dmatrix='optional'):
+    r"""
+    Evaluates the KS energy functional E[n] for a given density + orbitals
+    """
+
+    # Kinetic energy
+    kinetic_energy = 0
+    laplace = discrete_Laplace(params)
+    for i in range(0,params.num_particles):
+        del_sq_phi = np.dot(laplace,wavefunctions_ks[:,i])
+        kinetic_energy += np.sum(np.conj(wavefunctions_ks[:,i])*del_sq_phi)
+
+    kinetic_energy *= -0.5*params.dx
+
+    # Hartree energy
+    hartree_pot = v_h(params, density)
+    hartree_energy = 0.5*np.sum(density*hartree_pot)*params.dx
+
+    # External
+    external_pot = v_ext(params)
+    external_energy = np.sum(density*external_pot)*params.dx
+
+    if params.method == 'dft':
+        # XC energy
+        xc_pot = v_xc(density)
+        xc_energy = np.sum(density*xc_pot)*params.dx
+
+        total_energy = kinetic_energy + hartree_energy + external_energy + xc_energy
+
+    elif params.method == 'hf':
+        # Exchange energy
+        exchange_energy = 0
+        for i in range(0,params.Nspace):
+            for j in range(0,params.Nspace):
+                exchange_energy += dmatrix[i,j] / (abs(params.grid[i] - params.grid[j]) + params.soft)
+
+        total_energy = kinetic_energy + hartree_energy + external_energy + exchange_energy
+
+    return total_energy
