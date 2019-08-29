@@ -5,6 +5,7 @@ from density2potential.utils.physics import element_charges, calculate_density_k
 from density2potential.utils.math import discrete_Laplace, normalise_function
 import scipy.linalg as linalg
 from cask1d.src.hamiltonian import construct_hamiltonian_independent, update_hamiltonian, evaluate_energy_functional
+from cask1d.src.hamiltonian import v_h, fock_exchange, v_ext
 from cask1d.src.scf import pulay_mixing
 
 """
@@ -14,27 +15,20 @@ potential
 
 
 def minimise_energy_hf(params):
-
-    # Array that will store SCF iterative densities and residuals
-    #history_of_densities_in = np.zeros((params.history_length, params.Nspace, params.Nspace))
-    #history_of_densities_out = np.zeros((params.history_length, params.Nspace, params.Nspace))
-    #history_of_residuals = np.zeros((params.history_length, params.Nspace, params.Nspace))
-    #density_differences = np.zeros((params.history_length, params.Nspace, params.Nspace))
-    #residual_differences = np.zeros((params.history_length, params.Nspace, params.Nspace))
+    r"""
+    Compute ground state Hartree-Fock solution
+    """
 
     # Generate initial guess density (sum weighted Gaussians)
     dmatrix_in = initial_guess_dmatrix(params)
     density_in = np.diagonal(dmatrix_in)
-
-    plt.plot(density_in)
-    plt.show()
 
     # Construct the independent part of the hamiltonian, i.e. KE + v_external
     hamiltonian_independent = construct_hamiltonian_independent(params)
 
     # SCF loop
     i, error = 0, 1
-    while error > 1e-10:
+    while error > params.tol_hf:
 
         # Update hamiltonian with the orbital-dependent terms
         hamiltonian = update_hamiltonian(params, hamiltonian_independent, density_in, dmatrix_in)
@@ -59,12 +53,9 @@ def minimise_energy_hf(params):
 
         # Damped linear step for the first iteration
         dmatrix_in = dmatrix_in - params.step_length * (dmatrix_in - dmatrix_out)
+        density_in = np.diagonal(dmatrix_in)
 
         i += 1
-
-    np.save('hf_density.npy',density_out)
-    plt.plot(density_out)
-    plt.show()
 
     return wavefunctions_ks, total_energy, density_out
 
@@ -98,6 +89,8 @@ def calculate_dmatrix_ks(params, wavefunctions_ks):
     dmatrix = np.zeros((params.Nspace,params.Nspace))
 
     for i in range(0,params.num_particles):
-        dmatrix += np.conj(wavefunctions_ks[:,i])*np.conj(wavefunctions_ks[:,i])
+        for n in range(0,params.Nspace):
+            for m in range(0,params.Nspace):
+                dmatrix[n,m] += np.conj(wavefunctions_ks[n,i])*wavefunctions_ks[m,i]
 
     return dmatrix

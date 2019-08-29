@@ -36,14 +36,36 @@ def main():
     print(' ')
 
     # Find the Kohn-Sham potential that generates a given reference density
-    if args.task == 'dft':
+    if args.task == 'run':
 
         # Construct parameters class
         params = parameters()
 
-        #minimise_energy_hf(params)
-        minimise_energy_dft(params)
+        if params.method == 'hf':
+            wavefunctions, total_energy, density = minimise_energy_hf(params)
+        elif params.method == 'dft':
+            wavefunctions, total_energy, density = minimise_energy_dft(params)
+        elif params.method == 'h':
+            # DFT without the density functional
+            wavefunctions, total_energy, density = minimise_energy_dft(params)
 
+        # Save output wavefunctions and density
+        np.save('wavefunctions.npy',wavefunctions)
+        np.save('density_{}.npy'.format(params.method),density)
 
+        # Plot output
+        plt.plot(density,label='Ground state {} density'.format(params.method))
+        plt.legend()
+        plt.savefig('gs_density_{}.pdf'.format(params.method))
 
+    if args.task == 'plot':
 
+        x = np.load('density_hf.npy')
+        y = np.load('density_h.npy')
+        z = np.load('density_dft.npy')
+
+        plt.plot(x,label='hf')
+        plt.plot(y,label='h')
+        plt.plot(z,label='dft')
+        plt.legend()
+        plt.savefig('compare.pdf')

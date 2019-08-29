@@ -5,7 +5,7 @@ from density2potential.utils.physics import element_charges, calculate_density_k
 from density2potential.utils.math import discrete_Laplace, normalise_function
 import scipy.linalg as linalg
 from cask1d.src.hamiltonian import construct_hamiltonian_independent, update_hamiltonian
-from cask1d.src.hamiltonian import evaluate_energy_functional
+from cask1d.src.hamiltonian import evaluate_energy_functional, v_ext
 from cask1d.src.scf import pulay_mixing
 
 """
@@ -26,12 +26,14 @@ def minimise_energy_dft(params):
     # Generate initial guess density (sum weighted Gaussians)
     density_in = initial_guess_density(params)
 
+    np.save('vext.npy',v_ext(params))
+
     # Construct the independent part of the hamiltonian, i.e. KE + v_external
     hamiltonian_independent = construct_hamiltonian_independent(params)
 
     # SCF loop
     i, error = 0, 1
-    while error > 1e-10:
+    while error > params.tol_ks:
 
         # Iteration number modulus history length
         i_mod = i % params.history_length
@@ -77,12 +79,6 @@ def minimise_energy_dft(params):
 
         i += 1
 
-    x = np.load('hf_density.npy')
-
-    plt.plot(x)
-    plt.plot(density_out)
-    plt.show()
-
     return wavefunctions_ks, total_energy, density_out
 
 
@@ -105,21 +101,23 @@ def initial_guess_density(params):
     return density
 
 
-def calculate_total_energy(params, eigenenergies, density):
+def initial_guess_density_nonint(params):
     r"""
-    Calculates the total energy given a set of occupied eigenenergies
-    and corresponding density
+    Initial guess as the solution to the 'non-interacting' problem
     """
 
-    # Hartree energy
-    # Add Hartree potential
-    v_h = np.zeros(params.Nspace)
-    for i in range(0,params.Nspace):
-        for j in range(0,params.Nspace):
-            v_h[i] += density[j] / (abs(params.grid[i] - params.grid[j]) + params.soft)
-    v_h *= params.dx
-    E_h = 0.5*np.sum(density * v_h)*params.dx
 
-    total_energy = np.sum(eigenenergies) - E_h
+    # Independent Hamiltonian
+    hamiltonian = construct_hamiltonian_independent(params)
 
-    return total_energy
+    # Solve H psi = E psi
+    eigenvalues, eigenvectors = linalg.eigh(hamiltonian)
+
+    # Extract lowest lying num_particles eigenfunctions and normalise
+    wavefunctions_ks = eigenvectors[:,0:params.num_particles]
+    wavefunctions_ks[:,0:params.num_particles] = normalise_function(params, wavefunctions_ks[:,0:params.num_particles])
+
+    # Calculate the corresponding output density matrix
+    density = calculate_density_ks(params, wavefunctions_ks)
+
+    return density

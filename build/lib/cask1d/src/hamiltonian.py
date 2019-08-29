@@ -71,9 +71,9 @@ def v_xc(density):
         raise Exception('Negative density region exists, imaginary v_xc, exiting...')
 
     # Add XC potential (Entwistle 2017)
-    #v_xc = (-1.24 + 2.1*density - 1.7*density**2)*density**0.61
-    v_xc = np.copy(density)
-    v_xc *= 0
+    v_xc = (-1.24 + 2.1*density - 1.7*density**2)*density**0.61
+    #v_xc = np.copy(density)
+    #v_xc *= 0
 
     return v_xc
 
@@ -120,7 +120,9 @@ def fock_exchange(params, density_matrix):
     fock = np.zeros((params.Nspace,params.Nspace))
     for i in range(0,params.Nspace):
         for j in range(0,params.Nspace):
-            fock[i,j] += density_matrix[i,j] / (abs(params.grid[i] - params.grid[j]) + params.soft)
+            fock[i,j] -= density_matrix[i,j] / (abs(params.grid[i] - params.grid[j]) + params.soft)
+
+    fock *= params.dx
 
     return fock
 
@@ -155,7 +157,7 @@ def evaluate_energy_functional(params, wavefunctions_ks, density, dmatrix='optio
 
     # Hartree energy
     hartree_pot = v_h(params, density)
-    hartree_energy = 0.5*np.sum(density*hartree_pot)*params.dx
+    hartree_energy = np.sum(density*hartree_pot)*params.dx
 
     # External
     external_pot = v_ext(params)
@@ -173,8 +175,13 @@ def evaluate_energy_functional(params, wavefunctions_ks, density, dmatrix='optio
         exchange_energy = 0
         for i in range(0,params.Nspace):
             for j in range(0,params.Nspace):
-                exchange_energy += dmatrix[i,j] / (abs(params.grid[i] - params.grid[j]) + params.soft)
+                exchange_energy -= dmatrix[i,j]**2 / (abs(params.grid[i] - params.grid[j]) + params.soft)
 
+        exchange_energy *= params.dx**2
         total_energy = kinetic_energy + hartree_energy + external_energy + exchange_energy
+
+    else:
+        # Hartree energy
+        total_energy = kinetic_energy + hartree_energy + external_energy
 
     return total_energy

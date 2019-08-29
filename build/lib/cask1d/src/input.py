@@ -10,6 +10,10 @@ class parameters(object):
         # Level of approximation used
         self.method = 'dft'
 
+        # SCF tolerences
+        self.tol_ks = 1e-10
+        self.tol_hf = 1e-4
+
         # Size of real space cell
         self.cell = 50
         self.Nspace = 151
@@ -25,8 +29,8 @@ class parameters(object):
         self.supercell = 5
 
         # List of species + position
-        self.species = ['C']
-        self.position = [-2]
+        self.species = ['He']
+        self.position = [0]
 
         # SCF
         self.history_length = 10
