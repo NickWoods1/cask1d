@@ -1,12 +1,12 @@
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
-from density2potential.utils.physics import element_charges, calculate_density_ks
+from density2potential.utils.physics import calculate_density_ks
 from density2potential.utils.math import discrete_Laplace, normalise_function
 import scipy.linalg as linalg
 from cask1d.src.hamiltonian import construct_hamiltonian_independent, update_hamiltonian, evaluate_energy_functional
 from cask1d.src.hamiltonian import v_h, fock_exchange, v_ext
-from cask1d.src.scf import pulay_mixing
+from cask1d.src.scf import pulay_mixing, ODA
 
 """
 Computes the self-consistent Hartree-Fock orbitals, density, and energy given an external
@@ -51,8 +51,8 @@ def minimise_energy_hf(params):
         error = np.linalg.norm(dmatrix_in - dmatrix_out)
         print('SCF error = {0} at iteration {1} with energy {2}'.format(error, i, total_energy))
 
-        # Damped linear step for the first iteration
-        dmatrix_in = dmatrix_in - params.step_length * (dmatrix_in - dmatrix_out)
+        step_length = ODA(params, dmatrix_in, dmatrix_out)
+        dmatrix_in = dmatrix_in - step_length * (dmatrix_in - dmatrix_out)
         density_in = np.diagonal(dmatrix_in)
 
         i += 1

@@ -8,11 +8,11 @@ class parameters(object):
     def __init__(self,*args,**kwargs):
 
         # Level of approximation used
-        self.method = 'dft'
+        self.method = 'hf'
 
         # SCF tolerences
         self.tol_ks = 1e-10
-        self.tol_hf = 1e-4
+        self.tol_hf = 1e-10
 
         # Size of real space cell
         self.cell = 50

@@ -1,6 +1,6 @@
 import numpy as np
 from density2potential.utils.math import discrete_Laplace, normalise_function
-import matplotlib.pyplot as plt
+
 
 """
 Constructs the Hamiltonian, including all potentials
@@ -72,8 +72,6 @@ def v_xc(density):
 
     # Add XC potential (Entwistle 2017)
     v_xc = (-1.24 + 2.1*density - 1.7*density**2)*density**0.61
-    #v_xc = np.copy(density)
-    #v_xc *= 0
 
     return v_xc
 
@@ -146,6 +144,15 @@ def evaluate_energy_functional(params, wavefunctions_ks, density, dmatrix='optio
     Evaluates the KS energy functional E[n] for a given density + orbitals
     """
 
+    # Kinetic and external energy in terms of the density matrix
+    #hamiltonian_indep = construct_hamiltonian_independent(params)
+    #product = np.dot(hamiltonian_indep,dmatrix)
+    #energy_indep = 0
+    #for i in range(0,params.Nspace):
+    #    energy_indep += product[i,i]*params.dx
+
+
+
     # Kinetic energy
     kinetic_energy = 0
     laplace = discrete_Laplace(params)
@@ -154,6 +161,7 @@ def evaluate_energy_functional(params, wavefunctions_ks, density, dmatrix='optio
         kinetic_energy += np.sum(np.conj(wavefunctions_ks[:,i])*del_sq_phi)
 
     kinetic_energy *= -0.5*params.dx
+
 
     # Hartree energy
     hartree_pot = v_h(params, density)

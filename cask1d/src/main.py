@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from cask1d.src.input import parameters
 from cask1d.src.dft import minimise_energy_dft
 from cask1d.src.hf import minimise_energy_hf
+from cask1d.src.tf import minimise_energy_tf
 
 """
 Entry point for the requested action

@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
-from density2potential.utils.physics import element_charges, calculate_density_ks
+from density2potential.utils.physics import calculate_density_ks
 from density2potential.utils.math import discrete_Laplace, normalise_function
 import scipy.linalg as linalg
 from cask1d.src.hamiltonian import construct_hamiltonian_independent, update_hamiltonian
@@ -24,9 +24,7 @@ def minimise_energy_dft(params):
     residual_differences = np.zeros((params.history_length, params.Nspace))
 
     # Generate initial guess density (sum weighted Gaussians)
-    density_in = initial_guess_density(params)
-
-    np.save('vext.npy',v_ext(params))
+    density_in = initial_guess_density_nonint(params)
 
     # Construct the independent part of the hamiltonian, i.e. KE + v_external
     hamiltonian_independent = construct_hamiltonian_independent(params)
