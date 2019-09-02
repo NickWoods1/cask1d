@@ -144,15 +144,6 @@ def evaluate_energy_functional(params, wavefunctions_ks, density, dmatrix='optio
     Evaluates the KS energy functional E[n] for a given density + orbitals
     """
 
-    # Kinetic and external energy in terms of the density matrix
-    #hamiltonian_indep = construct_hamiltonian_independent(params)
-    #product = np.dot(hamiltonian_indep,dmatrix)
-    #energy_indep = 0
-    #for i in range(0,params.Nspace):
-    #    energy_indep += product[i,i]*params.dx
-
-
-
     # Kinetic energy
     kinetic_energy = 0
     laplace = discrete_Laplace(params)
@@ -161,7 +152,6 @@ def evaluate_energy_functional(params, wavefunctions_ks, density, dmatrix='optio
         kinetic_energy += np.sum(np.conj(wavefunctions_ks[:,i])*del_sq_phi)
 
     kinetic_energy *= -0.5*params.dx
-
 
     # Hartree energy
     hartree_pot = v_h(params, density)

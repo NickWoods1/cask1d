@@ -13,10 +13,11 @@ class parameters(object):
         # SCF tolerences
         self.tol_ks = 1e-10
         self.tol_hf = 1e-10
+        self.tol_tf = 1e-10
 
         # Size of real space cell
         self.cell = 50
-        self.Nspace = 151
+        self.Nspace = 251
         self.dx = self.cell / (self.Nspace - 1)
 
         # Grid
@@ -29,7 +30,7 @@ class parameters(object):
         self.supercell = 5
 
         # List of species + position
-        self.species = ['He']
+        self.species = ['Ne']
         self.position = [0]
 
         # SCF

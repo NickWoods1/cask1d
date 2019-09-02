@@ -42,6 +42,8 @@ def main():
         # Construct parameters class
         params = parameters()
 
+        minimise_energy_tf(params)
+
         if params.method == 'hf':
             wavefunctions, total_energy, density = minimise_energy_hf(params)
         elif params.method == 'dft':

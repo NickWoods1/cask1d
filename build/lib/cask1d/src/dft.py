@@ -20,7 +20,7 @@ def minimise_energy_dft(params):
     history_of_densities_in = np.zeros((params.history_length, params.Nspace))
     history_of_densities_out = np.zeros((params.history_length, params.Nspace))
     history_of_residuals = np.zeros((params.history_length, params.Nspace))
-    density_differences = np.zeros((params.history_length, params.Nspace))
+    density_differences = np.zeros((parms.history_length, params.Nspace))
     residual_differences = np.zeros((params.history_length, params.Nspace))
 
     # Generate initial guess density (sum weighted Gaussians)
@@ -94,7 +94,7 @@ def initial_guess_density(params):
         i += 1
 
     # Normalise
-    density *= params.num_atoms*(np.sum(density)*params.dx)**-1
+    density *= params.num_particles*(np.sum(density)*params.dx)**-1
 
     return density
 
