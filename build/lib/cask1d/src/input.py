@@ -8,7 +8,7 @@ class parameters(object):
     def __init__(self,*args,**kwargs):
 
         # Level of approximation used
-        self.method = 'hf'
+        self.method = 'tf'
 
         # SCF tolerences
         self.tol_ks = 1e-10
@@ -24,13 +24,13 @@ class parameters(object):
         self.grid = np.linspace(-0.5*self.cell, 0.5*self.cell, self.Nspace)
 
         # Stencil order for del^2 operator
-        self.stencil = kwargs.pop('stencil',9)
+        self.stencil = kwargs.pop('stencil',11)
 
         # Copies of real space cell
         self.supercell = 5
 
         # List of species + position
-        self.species = ['Ne']
+        self.species = ['Li']
         self.position = [0]
 
         # SCF

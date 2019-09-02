@@ -53,11 +53,7 @@ def minimise_energy_tf(params):
     print('Final energy = {0} with chemical potential {1}'.format(
             tf_energy_functional(params, density), chem_potential))
 
-    plt.plot(initial_guess_density(params))
-    plt.plot(density)
-    plt.show()
-
-    return density
+    return density, tf_energy_functional(params, density)
 
 
 def tf_objective_function(params, density, chem_potential):
@@ -69,7 +65,7 @@ def tf_objective_function(params, density, chem_potential):
     C = 0.5*(3*np.pi**2)**(2/3)
 
     # TF equation
-    residual = - v_ext(params) - v_h(params, density) - C*density**(2/3) + chem_potential + (6 / np.pi)**(1/3)*density**(1/3)
+    residual = - v_ext(params) - v_h(params, density) - C*density**(2/3) + chem_potential# + (6 / np.pi)**(1/3)*density**(1/3)
 
     return residual
 
@@ -87,10 +83,10 @@ def tf_energy_functional(params, density):
 
     # Hartree energy
     hartree_pot = v_h(params, density)
-    hartree_energy = np.sum(density*hartree_pot)*params.dx
+    hartree_energy = 0.5*np.sum(density*hartree_pot)*params.dx
 
     # External
     external_pot = v_ext(params)
-    external_energy = np.sum(density*external_pot)*params.dx
+    external_energy = -np.sum(density*external_pot)*params.dx
 
     return kinetic_energy + hartree_energy + external_energy

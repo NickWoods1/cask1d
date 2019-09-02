@@ -6,6 +6,7 @@ from cask1d.src.input import parameters
 from cask1d.src.dft import minimise_energy_dft
 from cask1d.src.hf import minimise_energy_hf
 from cask1d.src.tf import minimise_energy_tf
+from cask1d.src.ci import solve_ci_groundstate
 
 """
 Entry point for the requested action
@@ -37,12 +38,10 @@ def main():
     print(' ')
 
     # Find the Kohn-Sham potential that generates a given reference density
-    if args.task == 'run':
+    if args.task == 'get-groundstate':
 
         # Construct parameters class
         params = parameters()
-
-        minimise_energy_tf(params)
 
         if params.method == 'hf':
             wavefunctions, total_energy, density = minimise_energy_hf(params)
@@ -51,9 +50,13 @@ def main():
         elif params.method == 'h':
             # DFT without the density functional
             wavefunctions, total_energy, density = minimise_energy_dft(params)
+        elif params.method == 'tf':
+            density, energy = minimise_energy_tf(params)
 
         # Save output wavefunctions and density
-        np.save('wavefunctions.npy',wavefunctions)
+        if params.method != 'tf':
+            np.save('wavefunctions.npy',wavefunctions)
+
         np.save('density_{}.npy'.format(params.method),density)
 
         # Plot output
@@ -72,3 +75,14 @@ def main():
         plt.plot(z,label='dft')
         plt.legend()
         plt.savefig('compare.pdf')
+
+    if args.task == 'CI':
+
+        params = parameters()
+
+        print('Solving for ground state reference density first...')
+        #params.method = 'hf'
+        #wavefunctions, total_energy, density = minimise_energy_hf(params)
+
+        print('Constructing CI Hamiltonian...')
+        solve_ci_groundstate(params)#, wavefunctions)

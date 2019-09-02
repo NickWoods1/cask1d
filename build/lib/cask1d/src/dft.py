@@ -20,7 +20,7 @@ def minimise_energy_dft(params):
     history_of_densities_in = np.zeros((params.history_length, params.Nspace))
     history_of_densities_out = np.zeros((params.history_length, params.Nspace))
     history_of_residuals = np.zeros((params.history_length, params.Nspace))
-    density_differences = np.zeros((parms.history_length, params.Nspace))
+    density_differences = np.zeros((params.history_length, params.Nspace))
     residual_differences = np.zeros((params.history_length, params.Nspace))
 
     # Generate initial guess density (sum weighted Gaussians)

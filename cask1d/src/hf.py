@@ -41,7 +41,7 @@ def minimise_energy_hf(params):
         wavefunctions_ks[:,0:params.num_particles] = normalise_function(params, wavefunctions_ks[:,0:params.num_particles])
 
         # Calculate the output density
-        dmatrix_out = calculate_dmatrix_ks(params, wavefunctions_ks)
+        dmatrix_out = calculate_dmatrix(params, wavefunctions_ks)
         density_out = np.diagonal(dmatrix_out)
 
         # Calculate total energy
@@ -76,12 +76,12 @@ def initial_guess_dmatrix(params):
     wavefunctions_ks[:,0:params.num_particles] = normalise_function(params, wavefunctions_ks[:,0:params.num_particles])
 
     # Calculate the corresponding output density matrix
-    dmatrix = calculate_dmatrix_ks(params, wavefunctions_ks)
+    dmatrix = calculate_dmatrix(params, wavefunctions_ks)
 
     return dmatrix
 
 
-def calculate_dmatrix_ks(params, wavefunctions_ks):
+def calculate_dmatrix(params, wavefunctions):
     r"""
     Computes the density matrix corresponding to a set of orbitals
     """
@@ -91,6 +91,6 @@ def calculate_dmatrix_ks(params, wavefunctions_ks):
     for i in range(0,params.num_particles):
         for n in range(0,params.Nspace):
             for m in range(0,params.Nspace):
-                dmatrix[n,m] += np.conj(wavefunctions_ks[n,i])*wavefunctions_ks[m,i]
+                dmatrix[n,m] += np.conj(wavefunctions[n,i])*wavefunctions[m,i]
 
     return dmatrix

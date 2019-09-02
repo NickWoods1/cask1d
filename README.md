@@ -21,3 +21,5 @@ wavefunctions, total energy, and density.
 
 `hf` generates Hartree-Fock self-consistent single-particle
 wavefunctions, total energy, and density. 
+
+`tf` generates Thomas-Fermi density and energy

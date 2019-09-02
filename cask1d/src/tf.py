@@ -53,11 +53,7 @@ def minimise_energy_tf(params):
     print('Final energy = {0} with chemical potential {1}'.format(
             tf_energy_functional(params, density), chem_potential))
 
-    plt.plot(initial_guess_density(params))
-    plt.plot(density)
-    plt.show()
-
-    return density
+    return density, tf_energy_functional(params, density)
 
 
 def tf_objective_function(params, density, chem_potential):
