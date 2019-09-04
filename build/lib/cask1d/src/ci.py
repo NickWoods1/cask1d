@@ -8,7 +8,7 @@ from itertools import permutations# import itertools
 "Configuration Interaction from some reference orbitals"
 
 
-def solve_ci_groundstate(params):#, wavefunctions):
+def solve_ci_groundstate(params):#, orbitals):
 
     #dmatrix = calculate_dmatrix(params, wavefunctions)
     #density = np.diagonal(dmatrix)
@@ -22,6 +22,7 @@ def solve_ci_groundstate(params):#, wavefunctions):
     #perms = Permutation([0,1,2,3,4])
 
     #print(perms)
+    hartree_wavefunction = 1
 
     for perms in permutations(range(4)):
         l = list(perms)
@@ -29,8 +30,7 @@ def solve_ci_groundstate(params):#, wavefunctions):
         #print(perm_parity(l), perms)
 
         for i in l:
-            print(i)
-
+            hartree_wavefunction *= orbitals[i,:]
 
         #wavefunction += perm_parity(p) * ()
 
