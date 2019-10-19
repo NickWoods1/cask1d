@@ -7,6 +7,7 @@ from cask1d.src.dft import minimise_energy_dft
 from cask1d.src.hf import minimise_energy_hf
 from cask1d.src.tf import minimise_energy_tf
 from cask1d.src.ci import solve_ci_groundstate
+from cask1d.src.hamiltonian import v_ext
 
 """
 Entry point for the requested action
@@ -63,6 +64,12 @@ def main():
         plt.plot(density,label='Ground state {} density'.format(params.method))
         plt.legend()
         plt.savefig('gs_density_{}.pdf'.format(params.method))
+
+        plt.clf()
+        plt.plot(v_ext(params),label='{} external potential'.format(params.method))
+        plt.legend()
+        plt.savefig('{}_external_potential.pdf'.format(params.method))
+
 
     if args.task == 'plot':
 

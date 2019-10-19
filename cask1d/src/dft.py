@@ -2,11 +2,12 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 from density2potential.utils.physics import calculate_density_ks
-from density2potential.utils.math import discrete_Laplace, normalise_function
+from density2potential.utils.math import discrete_Laplace, normalise_function, norm
 import scipy.linalg as linalg
 from cask1d.src.hamiltonian import construct_hamiltonian_independent, update_hamiltonian
 from cask1d.src.hamiltonian import evaluate_energy_functional, v_ext
-from cask1d.src.scf import pulay_mixing
+from cask1d.src.scf import pulay_mixing, newton_mixing
+from cask1d.src.linear_response import calculate_susceptibility, calculate_dielectric
 
 """
 Computes the self-consistent Kohn-Sham orbitals, density, and energy given a density functional and external
@@ -41,6 +42,7 @@ def minimise_energy_dft(params):
 
         # Solve H psi = E psi
         eigenvalues, eigenvectors = linalg.eigh(hamiltonian)
+        eigenvectors = normalise_function(params, eigenvectors[:,0:])
 
         # Extract lowest lying num_particles eigenfunctions and normalise
         wavefunctions_ks = eigenvectors[:,0:params.num_particles]
@@ -74,8 +76,21 @@ def minimise_energy_dft(params):
             density_in = pulay_mixing(params, density_differences, residual_differences,
                                       history_of_residuals[i_mod], history_of_densities_in[i_mod], i)
 
+            #density_in = newton_mixing(params, history_of_densities_in[i_mod], history_of_residuals[i_mod], eigenvectors, eigenvalues)
 
         i += 1
+
+    # Plot linear response functions of the converged system
+    eigenvalues, eigenvectors = linalg.eigh(hamiltonian)
+    eigenvectors = normalise_function(params, eigenvectors[:,0:])
+    susceptibility = calculate_susceptibility(params, eigenvectors, eigenvalues)
+    dielectric = calculate_dielectric(params, density_out, susceptibility)
+    plt.imshow(susceptibility.real, origin='lower')
+    plt.show()
+    plt.clf()
+    plt.imshow(dielectric.real, origin='lower')
+    plt.colorbar()
+    plt.show()
 
     return wavefunctions_ks, total_energy, density_out
 

@@ -1,10 +1,32 @@
 import numpy as np
 from cask1d.src.hamiltonian import evaluate_energy_functional, construct_hamiltonian_independent, v_h, v_ext, v_xc
+from cask1d.src.linear_response import calculate_dielectric, calculate_susceptibility
+from density2potential.utils.math import discrete_Laplace, normalise_function, norm
 import matplotlib.pyplot as plt
 
 """
 Module containing non-linear root finders to update the density (matrix) in order to find self-consistency, F[n] = n.
 """
+
+
+def newton_mixing(params, current_density_in, current_residual, eigenfunctions, eigenenergies):
+    """
+    Exact Newton method using linear response functions.
+    """
+
+    # Compute susceptibility
+    susceptibility = calculate_susceptibility(params, eigenfunctions, eigenenergies)
+
+    # Compute dielectric, i.e. derivative dn/dn
+    dielectric = calculate_dielectric(params, current_density_in, susceptibility)
+
+    # Newton update
+    new_density_in = current_density_in + np.linalg.solve(dielectric, current_residual)
+
+    new_density_in = abs(new_density_in)
+    new_density_in *= params.num_particles / (np.sum(new_density_in)*params.dx)
+
+    return new_density_in
 
 
 def pulay_mixing(params, density_differences, residual_differences, current_residual, current_density_in, i):

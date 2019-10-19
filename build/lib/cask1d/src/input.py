@@ -8,7 +8,7 @@ class parameters(object):
     def __init__(self,*args,**kwargs):
 
         # Level of approximation used
-        self.method = 'tf'
+        self.method = 'h'
 
         # SCF tolerences
         self.tol_ks = 1e-10
@@ -16,8 +16,8 @@ class parameters(object):
         self.tol_tf = 1e-10
 
         # Size of real space cell
-        self.cell = 50
-        self.Nspace = 251
+        self.cell = 20
+        self.Nspace = 101
         self.dx = self.cell / (self.Nspace - 1)
 
         # Grid
@@ -35,13 +35,14 @@ class parameters(object):
 
         # SCF
         self.history_length = 10
-        self.step_length = 0.01
+        self.step_length = 0.1
 
         # Coulomb softening parameter
         self.soft = 1
 
         # Have v_ext specified by atoms or given explicitly
         self.manual_v_ext = False
+        self.v_ext = 0.5*(0.25**2)*self.grid**2
 
         # Define each element with corresponding atomic number
         self.element_charges = {'H': 1, 'He': 2, 'Li': 3, 'Be': 4, 'B': 5,
