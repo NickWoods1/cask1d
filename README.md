@@ -29,7 +29,7 @@ wavefunctions, total energy, and density.
 ### Work in progress
 ********************
 
-#####Partially complete:
+##### Partially complete:
  
  Calculation of linear response functions -- analysis and density mixing. 
 
