@@ -37,7 +37,7 @@ def calculate_dielectric(params, density, susceptibility):
     #xc_kernel = -4.437*density**1.61 + 3.381*density**0.61 - 0.7564*density**-0.39
     #xc_kernel = np.zeros(params.Nspace)
 
-    # Compute v_c(x,x')
+    # Compute K_c(x,x') = 1 / |x - x'|
     coulomb_kernel = np.zeros((params.Nspace, params.Nspace))
     for i in range(params.Nspace):
         for j in range(params.Nspace):

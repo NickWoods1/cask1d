@@ -35,7 +35,7 @@ class parameters(object):
 
         # SCF
         self.history_length = 10
-        self.step_length = 0.1
+        self.step_length = 1
 
         # Coulomb softening parameter
         self.soft = 1
