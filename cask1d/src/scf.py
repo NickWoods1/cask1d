@@ -20,11 +20,16 @@ def newton_mixing(params, current_density_in, current_residual, eigenfunctions, 
     # Compute dielectric, i.e. derivative dn/dn
     dielectric = calculate_dielectric(params, current_density_in, susceptibility)
 
+    #print('Int of dielectric {}'.format(np.sum(np.diag(dielectric[:,:]))*params.dx))
+    #print('Int of dielectric inverse {}'.format(np.sum(np.linalg.inv(dielectric[:,:]))*params.dx**2))
+
     # Newton update
     new_density_in = current_density_in + np.linalg.solve(dielectric, current_residual)
 
+    #print('update norm {}'.format(np.sum(np.linalg.solve(dielectric, current_residual))*params.dx**2))
+
     new_density_in = abs(new_density_in)
-    new_density_in *= params.num_particles / (np.sum(new_density_in)*params.dx)
+    #new_density_in *= params.num_particles / (np.sum(new_density_in)*params.dx)
 
     return new_density_in
 

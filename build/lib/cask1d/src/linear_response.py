@@ -45,6 +45,7 @@ def calculate_dielectric(params, density, susceptibility):
 
     # Compute residual linear response function, dn_out / dn_in.
     identity = np.eye(params.Nspace)
+
     dielectric = identity - (coulomb_kernel @ susceptibility)
 
     return dielectric

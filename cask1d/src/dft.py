@@ -54,11 +54,10 @@ def minimise_energy_dft(params):
         # Calculate the output density
         density_out = calculate_density_ks(params, wavefunctions_ks)
 
-
-        susceptibility = calculate_susceptibility(params, eigenvectors, eigenvalues)
-        dielectric = calculate_dielectric(params, density_out, susceptibility)
-        precond = dielectric
-        precond = np.eye(params.Nspace)
+        #susceptibility = calculate_susceptibility(params, eigenvectors, eigenvalues)
+        #dielectric = calculate_dielectric(params, density_out, susceptibility)
+        #precond = dielectric
+        #precond = np.eye(params.Nspace)
 
 
         # Calculate total energy
@@ -76,7 +75,7 @@ def minimise_energy_dft(params):
         if i == 0:
             # Damped linear step for the first iteration
             #density_in = density_in - params.step_length * (density_in - density_out)
-            density_in = density_in - params.step_length * np.dot(precond,(density_in - density_out))
+            density_in = density_in - params.step_length * params.step_length*(density_in - density_out)
 
         elif i > 0:
             # Store more iterative history data...
@@ -84,10 +83,10 @@ def minimise_energy_dft(params):
             residual_differences[i_mod_prev] = history_of_residuals[i_mod] - history_of_residuals[i_mod_prev]
 
             # Perform Pulay step using the iterative history data
-            density_in = pulay_mixing2(params, density_differences, residual_differences,
-                                     history_of_residuals[i_mod], history_of_densities_in[i_mod], i, precond)
+            #density_in = pulay_mixing2(params, density_differences, residual_differences,
+            #                         history_of_residuals[i_mod], history_of_densities_in[i_mod], i, precond)
 
-            #density_in = newton_mixing(params, history_of_densities_in[i_mod], history_of_residuals[i_mod], eigenvectors, eigenvalues)
+            density_in = newton_mixing(params, history_of_densities_in[i_mod], history_of_residuals[i_mod], eigenvectors, eigenvalues)
 
         i += 1
 
