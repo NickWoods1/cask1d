@@ -23,8 +23,6 @@ def minimise_energy_dft(params):
     Returns density, wavefunction, and ground state energy
     """
 
-    precond = np.load('jac.npy')
-
     # Array that will store SCF iterative densities and residuals
     history_of_densities_in = np.zeros((params.history_length, params.Nspace))
     history_of_densities_out = np.zeros((params.history_length, params.Nspace))
