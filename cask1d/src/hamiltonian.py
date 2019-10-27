@@ -30,6 +30,9 @@ def construct_hamiltonian(params, density, density_matrix='optional'):
 
 
 def construct_hamiltonian_independent(params):
+    """
+    Constructs the Hamiltonian for each particle without reference to other particles: H = KE + external
+    """
 
     # Kinetic energy stencil
     hamiltonian = kinetic(params)
@@ -60,11 +63,17 @@ def update_hamiltonian(params, hamiltonian_indep, density, density_matrix='optio
 
 
 def kinetic(params):
+    """
+    Kinetic energy for a given particle. -0.5del^2 on a grid.
+    """
 
     return -0.5*discrete_Laplace(params)
 
 
 def v_xc(density):
+    """
+    Exchange-correlation approximation. LDA from Entwistle 2017.
+    """
 
     # Check negative regions of density (imaginary v_xc)
     if np.amin(density) < 0:

@@ -8,7 +8,7 @@ class parameters(object):
     def __init__(self,*args,**kwargs):
 
         # Level of approximation used
-        self.method = 'h'
+        self.method = 'dft'
 
         # SCF tolerences
         self.tol_ks = 1e-10
@@ -30,7 +30,7 @@ class parameters(object):
         self.supercell = 5
 
         # List of species + position
-        self.species = ['Li']
+        self.species = ['He']
         self.position = [0]
 
         # SCF

@@ -70,26 +70,27 @@ def main():
         plt.legend()
         plt.savefig('{}_external_potential.pdf'.format(params.method))
 
-
     if args.task == 'plot':
 
-        x = np.load('density_hf.npy')
-        y = np.load('density_h.npy')
-        z = np.load('density_dft.npy')
+        # Given the output of a HF, H, and DFT calculation, plot three output densities.
+        hf = np.load('density_hf.npy')
+        h = np.load('density_h.npy')
+        dft = np.load('density_dft.npy')
 
-        plt.plot(x,label='hf')
-        plt.plot(y,label='h')
-        plt.plot(z,label='dft')
+        plt.plot(hf,label='hf')
+        plt.plot(h,label='h')
+        plt.plot(dft,label='dft')
         plt.legend()
         plt.savefig('compare.pdf')
 
     if args.task == 'CI':
 
+        # Construct parameters
         params = parameters()
 
         print('Solving for ground state reference density first...')
         #params.method = 'hf'
         #wavefunctions, total_energy, density = minimise_energy_hf(params)
 
-        print('Constructing CI Hamiltonian...')
-        solve_ci_groundstate(params)#, wavefunctions)
+        #print('Constructing CI Hamiltonian...')
+        #solve_ci_groundstate(params)#, wavefunctions)
