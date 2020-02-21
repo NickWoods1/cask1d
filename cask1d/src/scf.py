@@ -1,6 +1,6 @@
 import numpy as np
 from cask1d.src.hamiltonian import evaluate_energy_functional, construct_hamiltonian_independent, v_h, v_ext, v_xc
-from cask1d.src.linear_response import calculate_dielectric, calculate_susceptibility_idea
+from cask1d.src.linear_response import calculate_dielectric, calculate_susceptibility
 from density2potential.utils.math import discrete_Laplace, normalise_function, norm
 import matplotlib.pyplot as plt
 import numdifftools as nd
@@ -19,7 +19,7 @@ def newton_mixing(params, current_density_in, current_residual, eigenfunctions, 
     if method == 'adler-wiser':
 
         # Compute susceptibility
-        susceptibility = calculate_susceptibility_idea(params, eigenfunctions, eigenenergies)
+        susceptibility = calculate_susceptibility(params, eigenfunctions, eigenenergies)
 
         # Compute dielectric, i.e. derivative dn/dn
         dielectric = calculate_dielectric(params, current_density_in, susceptibility)
@@ -34,14 +34,7 @@ def newton_mixing(params, current_density_in, current_residual, eigenfunctions, 
         # Numerical Jacobian
         current_jacobian = nd.Jacobian(ks_objective_function)(current_density_in, params)
 
-        # TODO Make numerical susceptability + dielectric calculator match full residual Jacobian calculator
-        #potential = np.zeros(params.Nspace)
-        #suscept = nd.Jacobian(ks_objective_function_pot)(potential, current_density_in, params)
-        #current_jacobian = -calculate_dielectric(params, current_density_in, suscept)
-        #eigvals, eigvecs = np.linalg.eig(suscept)
-        #print(eigvals)
-
-        #np.save('jacobian.npy',current_jacobian)
+        #np.save('jac.npy',current_jacobian)
 
         # Newton update
         new_density_in = current_density_in - np.linalg.solve(current_jacobian, current_residual)
@@ -49,7 +42,7 @@ def newton_mixing(params, current_density_in, current_residual, eigenfunctions, 
     else:
         raise Exception('No valid method entered for computing the Jacobian.')
 
-    new_density_in = abs(new_density_in)
+    #new_density_in = abs(new_density_in)
     #new_density_in *= params.num_particles / (np.sum(new_density_in)*params.dx)
 
     return new_density_in
@@ -185,32 +178,14 @@ def ks_objective_function(density_in, params):
     wavefunctions_ks = eigenvectors[:,0:params.num_particles]
     wavefunctions_ks[:,0:params.num_particles] = normalise_function(params, wavefunctions_ks[:,0:params.num_particles])
 
+    # Calculate the output density
     density_out = calculate_density_ks(params, wavefunctions_ks)
 
     # Residual map
     residual = density_out - density_in
 
+    # Print error
+    #print(np.sum(abs(residual)))
+
     return residual
 
-
-def ks_objective_function_potential(delta_v, density_in, params):
-    """
-    For calculating dn_out / dv_in
-    """
-
-    # Construct Hamiltonian
-    hamiltonian = construct_hamiltonian(params, density_in)
-
-    hamiltonian += np.diag(delta_v)
-
-    # Solve H psi = E psi
-    eigenvalues, eigenvectors = np.linalg.eigh(hamiltonian)
-    eigenvectors = normalise_function(params, eigenvectors[:,0:])
-
-    # Extract lowest lying num_particles eigenfunctions and normalise
-    wavefunctions_ks = eigenvectors[:,0:params.num_particles]
-    wavefunctions_ks[:,0:params.num_particles] = normalise_function(params, wavefunctions_ks[:,0:params.num_particles])
-
-    density_out = calculate_density_ks(params, wavefunctions_ks)
-
-    return density_out

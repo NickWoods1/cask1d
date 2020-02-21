@@ -75,12 +75,9 @@ def v_xc(density):
     Exchange-correlation approximation. LDA from Entwistle 2017.
     """
 
-    # TODO Uncomment exception for negative densities when not using numerical Jacobian calculator
     # Check negative regions of density (imaginary v_xc)
-    #if np.amin(density) < 0:
-    #    raise Exception('Negative density region exists, imaginary v_xc, exiting...')
-
-    density = abs(density)
+    if np.amin(density) < 0:
+        raise Exception('Negative density region exists, imaginary v_xc, exiting...')
 
     # Add XC potential (Entwistle 2017)
     v_xc = (-1.24 + 2.1*density - 1.7*density**2)*density**0.61

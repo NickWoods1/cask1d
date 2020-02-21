@@ -76,28 +76,23 @@ def minimise_energy_dft(params):
             # Damped linear step for the first iteration
             density_in = density_in - params.step_length * (density_in - density_out)
 
-
         elif i > 0:
             # Store more iterative history data...
             density_differences[i_mod_prev] = history_of_densities_in[i_mod] - history_of_densities_in[i_mod_prev]
             residual_differences[i_mod_prev] = history_of_residuals[i_mod] - history_of_residuals[i_mod_prev]
 
             # Perform Pulay step using the iterative history data
-            #density_in = pulay_mixing(params, density_differences, residual_differences,
-            #                         history_of_residuals[i_mod], history_of_densities_in[i_mod], i)
+            density_in = pulay_mixing(params, density_differences, residual_differences,
+                                     history_of_residuals[i_mod], history_of_densities_in[i_mod], i)
 
-            density_in = newton_mixing(params, history_of_densities_in[i_mod], history_of_residuals[i_mod],
-                                       eigenvectors, eigenvalues, method='numerical_jacobian')
+            #density_in = newton_mixing(params, history_of_densities_in[i_mod], history_of_residuals[i_mod],
+            #                           eigenvectors, eigenvalues, method='numerical_jacobian')
 
         i += 1
 
 
     # Plot linear response functions of the converged system
     eigenvalues, eigenvectors = linalg.eigh(hamiltonian)
-    plt.plot(abs(eigenvectors[:,0])**2,label='0th')
-    plt.plot(abs(eigenvectors[:,1])**2, label='1st')
-    plt.legend()
-    plt.show()
     eigenvectors = normalise_function(params, eigenvectors[:,0:])
     susceptibility = calculate_susceptibility(params, eigenvectors, eigenvalues)
     dielectric = calculate_dielectric(params, density_out, susceptibility)

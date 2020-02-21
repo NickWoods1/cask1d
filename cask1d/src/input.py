@@ -16,8 +16,8 @@ class parameters(object):
         self.tol_tf = 1e-10
 
         # Size of real space cell
-        self.cell = 10
-        self.Nspace = 61
+        self.cell = 20
+        self.Nspace = 101
         self.dx = self.cell / (self.Nspace - 1)
 
         # Grid
@@ -30,12 +30,12 @@ class parameters(object):
         self.supercell = 5
 
         # List of species + position
-        self.species = ['Li']
+        self.species = ['He']
         self.position = [0]
 
         # SCF
         self.history_length = 10
-        self.step_length = 0.0001
+        self.step_length = 1
 
         # Coulomb softening parameter
         self.soft = 1

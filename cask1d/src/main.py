@@ -83,3 +83,14 @@ def main():
         plt.legend()
         plt.savefig('compare.pdf')
 
+    if args.task == 'CI':
+
+        # Construct parameters
+        params = parameters()
+
+        print('Solving for ground state reference density first...')
+        #params.method = 'hf'
+        #wavefunctions, total_energy, density = minimise_energy_hf(params)
+
+        #print('Constructing CI Hamiltonian...')
+        #solve_ci_groundstate(params)#, wavefunctions)
