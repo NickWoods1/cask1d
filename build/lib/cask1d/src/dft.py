@@ -82,11 +82,11 @@ def minimise_energy_dft(params):
             residual_differences[i_mod_prev] = history_of_residuals[i_mod] - history_of_residuals[i_mod_prev]
 
             # Perform Pulay step using the iterative history data
-            density_in = pulay_mixing(params, density_differences, residual_differences,
-                                     history_of_residuals[i_mod], history_of_densities_in[i_mod], i)
+            #density_in = pulay_mixing(params, density_differences, residual_differences,
+            #                        history_of_residuals[i_mod], history_of_densities_in[i_mod], i)
 
-            #density_in = newton_mixing(params, history_of_densities_in[i_mod], history_of_residuals[i_mod],
-            #                           eigenvectors, eigenvalues, method='numerical_jacobian')
+            density_in = newton_mixing(params, history_of_densities_in[i_mod], history_of_residuals[i_mod],
+                                eigenvectors, eigenvalues, method='adler-wiser')
 
         i += 1
 
@@ -97,11 +97,9 @@ def minimise_energy_dft(params):
     susceptibility = calculate_susceptibility(params, eigenvectors, eigenvalues)
     dielectric = calculate_dielectric(params, density_out, susceptibility)
     plt.imshow(susceptibility.real, origin='lower')
-    plt.show()
-    plt.clf()
-    plt.imshow(dielectric.real, origin='lower')
     plt.colorbar()
     plt.show()
+
 
     return wavefunctions_ks, total_energy, density_out
 

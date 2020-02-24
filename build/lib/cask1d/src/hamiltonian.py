@@ -75,6 +75,8 @@ def v_xc(density):
     Exchange-correlation approximation. LDA from Entwistle 2017.
     """
 
+    density = abs(density)
+
     # Check negative regions of density (imaginary v_xc)
     if np.amin(density) < 0:
         raise Exception('Negative density region exists, imaginary v_xc, exiting...')
@@ -89,6 +91,7 @@ def v_h(params, density):
     r"""
     Hartree potential for a given density
     """
+
     # Add Hartree potential
     v_h = np.zeros(params.Nspace)
     for i in range(0,params.Nspace):

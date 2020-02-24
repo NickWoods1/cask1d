@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numdifftools as nd
 from cask1d.src.hamiltonian import construct_hamiltonian
 from density2potential.utils.physics import calculate_density_ks
+
 """
 Module containing non-linear root finders to update the density (matrix) in order to find self-consistency, F[n] = n.
 """
@@ -20,30 +21,24 @@ def newton_mixing(params, current_density_in, current_residual, eigenfunctions, 
 
         # Compute susceptibility
         susceptibility = calculate_susceptibility(params, eigenfunctions, eigenenergies)
+        susceptibility *= params.dx
 
         # Compute dielectric, i.e. derivative dn/dn
         dielectric = calculate_dielectric(params, current_density_in, susceptibility)
 
-        print(np.sum(np.dot(np.linalg.inv(dielectric)[:,:],current_residual)))
-
         # Newton update
-        new_density_in = current_density_in + np.linalg.solve(dielectric, current_residual)
+        new_density_in = current_density_in + np.linalg.solve(dielectric.real, current_residual)
 
     elif method == 'numerical_jacobian':
 
         # Numerical Jacobian
         current_jacobian = nd.Jacobian(ks_objective_function)(current_density_in, params)
 
-        #np.save('jac.npy',current_jacobian)
-
         # Newton update
-        new_density_in = current_density_in - np.linalg.solve(current_jacobian, current_residual)
+        new_density_in = current_density_in - np.linalg.solve(current_jacobian.real, current_residual)
 
     else:
         raise Exception('No valid method entered for computing the Jacobian.')
-
-    #new_density_in = abs(new_density_in)
-    #new_density_in *= params.num_particles / (np.sum(new_density_in)*params.dx)
 
     return new_density_in
 
@@ -183,9 +178,6 @@ def ks_objective_function(density_in, params):
 
     # Residual map
     residual = density_out - density_in
-
-    # Print error
-    #print(np.sum(abs(residual)))
 
     return residual
 

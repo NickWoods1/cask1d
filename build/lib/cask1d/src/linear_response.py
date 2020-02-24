@@ -25,6 +25,19 @@ def calculate_susceptibility(params, eigenfunctions, eigenenergies):
             g = eigenfunctions[:,j].conj() * eigenfunctions[:,i]
             susceptibility[:,:] += 2*np.outer(f,g) / delta_energy
 
+    # TODO: have parameters that control accuracy of Newton approx, and compare to Pulay
+    """
+    eigv, eigf = np.linalg.eigh(susceptibility)
+    for i in range(20):
+        plt.plot(eigf[:,i].real)
+        plt.show()
+        plt.clf()
+    #suscept_new = 0*susceptibility
+    #for i in range(params.Nspace):
+    #    suscept_new += eigv[i]*np.outer(eigf[:,i],eigf[:,i])
+    #print(eigv)
+    """
+
     return susceptibility
 
 
@@ -34,8 +47,10 @@ def calculate_dielectric(params, density, susceptibility):
     """
 
     # Compute K_xc(x,x')
-    #xc_kernel = -4.437*density**1.61 + 3.381*density**0.61 - 0.7564*density**-0.39
-    #xc_kernel = np.zeros(params.Nspace)
+    if params.method == 'dft':
+        xc_kernel = (-4.437*density**1.61 + 3.381*density**0.61 - 0.7564*density**-0.39) / params.dx
+    else:
+        xc_kernel = np.zeros(params.Nspace)
 
     # Compute K_c(x,x') = 1 / |x - x'|
     coulomb_kernel = np.zeros((params.Nspace, params.Nspace))
@@ -46,7 +61,7 @@ def calculate_dielectric(params, density, susceptibility):
     # Compute residual linear response function, dn_out / dn_in.
     identity = np.eye(params.Nspace)
 
-    dielectric = identity - (coulomb_kernel @ susceptibility)
+    dielectric = identity - (susceptibility @ (coulomb_kernel + np.diag(xc_kernel))) * params.dx
 
     return dielectric
 
