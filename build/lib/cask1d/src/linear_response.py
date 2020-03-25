@@ -26,16 +26,29 @@ def calculate_susceptibility(params, eigenfunctions, eigenenergies):
             susceptibility[:,:] += 2*np.outer(f,g) / delta_energy
 
     # TODO: have parameters that control accuracy of Newton approx, and compare to Pulay
+
     """
     eigv, eigf = np.linalg.eigh(susceptibility)
-    for i in range(20):
-        plt.plot(eigf[:,i].real)
-        plt.show()
-        plt.clf()
+    #for i in range(20):
+    #    plt.plot(eigf[:,i].real)
+    #    plt.show()
+    #    plt.clf()
     #suscept_new = 0*susceptibility
     #for i in range(params.Nspace):
     #    suscept_new += eigv[i]*np.outer(eigf[:,i],eigf[:,i])
-    #print(eigv)
+    """
+    """
+    plt.clf()
+    plt.yscale('log')
+    plt.title('1D Li SCF LDA calculation -- eigenvalues of g.s. chi0 ')
+    plt.ylabel('Log eigenvalue')
+    plt.xlabel('Label')
+    plt.plot(-eigv[0:249], label='Eigenvalues of chi0')
+    plt.legend()
+    plt.savefig('Li_scf_chi0_evals.pdf')
+    plt.clf()
+
+    print(eigv)
     """
 
     return susceptibility

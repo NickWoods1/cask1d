@@ -16,7 +16,7 @@ class parameters(object):
         self.tol_tf = 1e-10
 
         # Size of real space cell
-        self.cell = 40
+        self.cell = 20
         self.Nspace = 251
         self.dx = self.cell / (self.Nspace - 1)
 

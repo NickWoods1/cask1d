@@ -95,6 +95,13 @@ def minimise_energy_dft(params):
     eigenvalues, eigenvectors = linalg.eigh(hamiltonian)
     eigenvectors = normalise_function(params, eigenvectors[:,0:])
     susceptibility = calculate_susceptibility(params, eigenvectors, eigenvalues)
+
+    eigval, eigvec = np.linalg.eigh(susceptibility)
+    for i in range(len(eigval)):
+        plt.plot(eigvec[:,i])
+        plt.show()
+        plt.clf()
+
     dielectric = calculate_dielectric(params, density_out, susceptibility)
     plt.imshow(susceptibility.real, origin='lower')
     plt.colorbar()
